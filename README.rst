@@ -1,3 +1,7 @@
+This fork adds support for existing security groups. That is, port security will not be disabled. Use the ``--use-sg`` command line argument. If you specify only this, the project's default security group will be used, or you can specify any of the existing groups after the ``--use-sg`` parameter. You can also specify a security group in the configuration file. Specifying multiple security groups is not provided.
+
+----
+
 NFVbench: A Network Performance Benchmarking Tool for NFVi Full Stacks
 **********************************************************************
 
