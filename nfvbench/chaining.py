@@ -165,16 +165,42 @@ class ChainVnfPort(object):
             port = self.manager.neutron_client.create_port(body)
             self.port = port['port']
             LOG.info('Created port %s', name)
-            try:
-                self.manager.neutron_client.update_port(self.port['id'], {
-                    'port': {
-                        'security_groups': [],
-                        'port_security_enabled': False,
-                    }
-                })
-                LOG.info('Security disabled on port %s', name)
-            except Exception:
-                LOG.info('Failed to disable security on port %s (ignored)', name)
+            if not 'security_group' in self.manager.config.keys():
+                try:
+                    self.manager.neutron_client.update_port(self.port['id'], {
+                        'port': {
+                            'security_groups': [],
+                            'port_security_enabled': False,
+                        }
+                    })
+                    LOG.info('Security disabled on port %s', name)
+                except Exception:
+                    LOG.info('Failed to disable security on port %s (ignored)', name)
+            elif self.manager.config.security_group == '':
+                try:
+                    self.manager.neutron_client.update_port(self.port['id'], {
+                        'port': {
+                            'allowed_address_pairs': [{'ip_address': self.manager.config.traffic_generator.ip_addrs[0] },
+                                {'ip_address': self.manager.config.traffic_generator.ip_addrs[1] }],
+                        }
+                    })
+                    LOG.info('Port security will not be disabled. %s uses the default security group.', name)
+                except Exception:
+                    LOG.error('Allowed address pairs were not added to the port %s', name)
+            else:
+                sec_group = self.manager.neutron_client.list_security_groups(name=self.manager.config.security_group, fields=['id'])
+                for sg_id in sec_group['security_groups']:
+                    try:
+                        self.manager.neutron_client.update_port(self.port['id'], {
+                            'port': {
+                                'security_groups': [*sg_id.values()],
+                                'allowed_address_pairs': [{'ip_address': self.manager.config.traffic_generator.ip_addrs[0] },
+                                    {'ip_address': self.manager.config.traffic_generator.ip_addrs[1] }],
+                            }
+                        })
+                        LOG.info('Port security will not be disabled. %s uses the %s security group.', name, *sg_id.values())
+                    except Exception:
+                        LOG.error('Allowed address pairs were not added to the port %s', name)
 
     def get_mac(self):
         """Get the MAC address for this port."""

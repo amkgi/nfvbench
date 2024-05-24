@@ -951,3 +951,9 @@ no_e2e_check: false
 # Designed for development needs
 # The hexadecimal notation (0x...) is accepted.
 debug_mask: 0x00000000
+
+# Do not disable port security
+# Use the default security group using the command line argument, or specify a single security group as in the following example
+# Example:
+# security_group: any_group
+# THIS PARAMETER MUST NOT BE EMPTY otherwise it must be commented out

@@ -444,6 +444,14 @@ def _parse_opts_from_cli():
                         action='store_true',
                         help='Enable MPLS encapsulation')
 
+    parser.add_argument('--use-sg', dest='use_sg',
+                        action='store',
+                        const='',
+                        nargs='?',
+                        metavar='<security group name>',
+                        help='Do not disable port security and specify single security group. ' 
+                             'If left empty, the default security group will be used.')
+
     parser.add_argument('--no-cleanup', dest='no_cleanup',
                         default=None,
                         action='store_true',
@@ -810,6 +818,8 @@ def main():
         if opts.debug_mask is not None:
             config.debug_mask = opts.debug_mask
             opts.debug_mask = None
+        if opts.use_sg is not None:
+            config.security_group = opts.use_sg
 
         # convert 'user_info' opt from json string to dictionnary
         # and merge the result with the current config dictionnary
